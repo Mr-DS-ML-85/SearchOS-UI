@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SearchOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
+</head>
+<body>
+  <!-- Ambient background -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <!-- Top navigation with persistent search -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/" class="brand" id="brand">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </span>
+        <span class="brand-name">Search<em>OS</em></span>
+      </a>
+
+      <div class="searchbox-wrap">
+        <div class="searchbox" id="searchBox">
+          <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" type="text" placeholder="Search anything…" autocomplete="off" spellcheck="false" />
+          <button class="sb-clear" id="searchClear" aria-label="Clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+          <button class="sb-go" id="searchGo" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="suggest" id="suggestBox"></div>
+      </div>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab active" data-view="web" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          Web
+        </button>
+        <button class="tab" data-view="images" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+          Images
+        </button>
+      </nav>
+
+      <div class="topbar-right">
+        <div class="status-pill" id="statusPill" title="Gateway status">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">connecting…</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HOME / HERO ============ -->
+  <main class="hero" id="heroView">
+    <div class="hero-inner">
+      <h1 class="hero-title">Search your<br/><span class="grad-text">universe</span></h1>
+      <p class="hero-sub">Local index · vector · live web — one beautifully fast search.</p>
+      <div class="hero-chips" id="heroChips">
+        <button class="chip" data-q="postgres autovacuum tuning">Postgres autovacuum</button>
+        <button class="chip" data-q="hnsw gpu vector index">HNSW GPU</button>
+        <button class="chip" data-q="tokio runtime async rust">Tokio runtime</button>
+        <button class="chip" data-q="search engine architecture">Search architecture</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ RESULTS ============ -->
+  <main class="results-view" id="resultsView" hidden>
+    <!-- filter bar -->
+    <div class="filterbar" id="filterbar">
+      <div class="filterbar-inner">
+        <div class="fgroup" id="sourceFilters">
+          <button class="fbtn active" data-source="all">All</button>
+          <button class="fbtn" data-source="local">Local</button>
+          <button class="fbtn" data-source="vector">Vector</button>
+          <button class="fbtn" data-source="web">Web</button>
+        </div>
+        <div class="fsep"></div>
+        <div class="fgroup" id="timeFilters">
+          <button class="fbtn" data-time="day">Day</button>
+          <button class="fbtn" data-time="week">Week</button>
+          <button class="fbtn" data-time="month">Month</button>
+          <button class="fbtn" data-time="year">Year</button>
+          <button class="fbtn active" data-time="all">Any time</button>
+        </div>
+        <div class="fsep"></div>
+        <label class="domain-filter" title="Filter by domain — e.g. docs.rs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <input id="domainInput" type="text" placeholder="Domain filter…" />
+        </label>
+      </div>
+    </div>
+
+    <!-- image-to-image bar -->
+    <div class="img2img-bar" id="img2imgBar" hidden>
+      <div class="img2img-inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        <input id="imageUrlInput" type="text" placeholder="Paste an image URL to find similar images…" />
+        <button class="img2img-btn" id="imageUrlGo">Search by image</button>
+      </div>
+    </div>
+
+    <!-- meta row -->
+    <div class="metarow" id="metarow" hidden>
+      <span id="metaInfo"></span>
+      <span class="meta-right" id="metaBadges"></span>
+    </div>
+
+    <!-- web results -->
+    <section class="results" id="webResults">
+      <div class="skeleton-grid" id="skeletonGrid"></div>
+      <div class="result-list" id="resultList"></div>
+      <div class="empty-state" id="emptyState" hidden>
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+        </div>
+        <h3>No results found</h3>
+        <p>Try different keywords, remove filters, or check your spelling.</p>
+      </div>
+      <div class="loadmore-wrap" id="loadMoreWrap" hidden>
+        <button class="loadmore-btn" id="loadMoreBtn">
+          <span class="lm-label">Load more</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- image results -->
+    <section class="images-view" id="imagesView" hidden>
+      <div class="img-grid" id="imgGrid"></div>
+      <div class="empty-state" id="imgEmpty" hidden>
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        </div>
+        <h3>No images found</h3>
+        <p>Nothing in the index depicts that. Try different words.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ READER MODAL ============ -->
+  <div class="modal-overlay" id="readerOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Reader">
+      <div class="modal-head">
+        <div class="modal-url" id="readerUrl"></div>
+        <button class="modal-close" id="readerClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="readerBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
