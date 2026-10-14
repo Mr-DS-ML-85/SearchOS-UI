@@ -15,7 +15,6 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 # --- application -------------------------------------------------
 COPY webui ./webui
-COPY .env ./env
 RUN chown -R app:app /app
 USER app
 
