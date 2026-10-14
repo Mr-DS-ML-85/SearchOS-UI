@@ -21,6 +21,10 @@ A beautiful, production-grade web interface for [SearchOS](https://github.com/Se
 
 ## Quick Start
 
+## Testing Instance
+
+https://searchos.furylogic.com
+
 ### Docker (recommended)
 
 ```bash
