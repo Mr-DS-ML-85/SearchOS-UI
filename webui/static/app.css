@@ -326,6 +326,7 @@ em { font-style: normal; }
 }
 .badge.warn { border-color: rgba(255,180,84,0.35); color: var(--warn); background: rgba(255,180,84,0.08); }
 .badge.info { border-color: rgba(76,201,240,0.3); color: var(--accent-2); background: rgba(76,201,240,0.07); }
+.badge.ok { border-color: rgba(61,220,151,0.3); color: var(--good); background: rgba(61,220,151,0.07); }
 
 /* result list */
 .results { max-width: 860px; margin: 0 auto; padding: 8px 24px 60px; }

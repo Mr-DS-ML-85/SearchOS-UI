@@ -278,12 +278,23 @@
       s.textContent = text;
       metaBadges.appendChild(s);
     };
-    if (data.degraded?.length) addBadge("warn", `degraded: ${data.degraded.join(", ")}`);
-    if (data.low_confidence) addBadge("warn", "low confidence");
+
+    // per-provider health: ok / degraded / empty
+    const degraded = new Set(data.degraded || []);
+    const empty = new Set(data.empty_providers || []);
+    const lat = data.provider_latency_ms || {};
     if (data.providers?.length) {
-      const pl = data.providers.map((p) => SOURCE_LABEL[p] || p).join(" · ");
-      addBadge("info", pl);
+      data.providers.forEach((p) => {
+        const name = SOURCE_LABEL[p] || p;
+        if (degraded.has(p)) addBadge("warn", `${name} degraded`);
+        else if (empty.has(p)) addBadge("info", `${name} empty`);
+        else {
+          const ms = lat[p];
+          addBadge("ok", `${name}${ms != null ? ` ${Math.round(ms)}ms` : ""}`);
+        }
+      });
     }
+    if (data.low_confidence) addBadge("warn", "low confidence");
   }
 
   function renderMetaError(err) {
